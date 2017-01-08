@@ -172,9 +172,10 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 				print(meta)
 				continue
 			filenum =  meta[3]
-			#we only want the file to be 6 characters long, to be safe
-			if len(filenum) >6:
-				filenum = filenum[:6]
+			#we only want the file to be 5 characters long, to be safe
+			if len(filenum) >5:
+				#filenum = filenum[:6]
+				filenum = filenum[-5:]
 			#if the old file is not labelled with source, we need to add it to match later with actual files
 			if len(meta) == 4:
 				meta.append("S")

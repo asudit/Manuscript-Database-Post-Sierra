@@ -324,6 +324,8 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 	else:
 		shutil.copy(metadata_xlsx, csv_name_output + "\\"+ "temp_csvs" + "\\" + state + "_" + year + '.csv')
 	#print(metadata_csv)
+	# duplicates are usually not an issue for renaming, except in cases when the duplicate file's new name is the same as the non-duplicates new file
+	duplicate_set = set([])
 	with open(csv_name_output + "\\" + 'temp_csvs' + "\\" + state + "_" + year + '.csv', 'rt') as f:
 		file = csv.reader(f)
 		file.next()
@@ -344,7 +346,7 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 			
 			old_name, old_type = os.path.splitext(old_file)
 			#the old filenames have to match the ones in the actual directory -- the ones in the directory have labels, those in the csv do not
-			if "_A" not in old_file:
+			if "_A." not in old_file:
 				old_file = old_name + "_A" + old_type
 
 			#in this case, at least for Iowa, we have a duplicate file e.g. 
@@ -407,6 +409,7 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 							meta_8.remove('1half')
 						old_file = "_".join(meta_8) + filetype_8
 
+			
 			#for filename, some of them might have really long numbers, and extra counties if "-" condition not met
 			filename, filetype = os.path.splitext(old_file)
 			meta = filename.split("_")
@@ -433,21 +436,32 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 				file_num = meta[-1][:6]
 				tail = 'A.jpg'
 			'''
-			file_num = meta[3][:6]
+			#we want the last 5 digits (lots of leading zeros in old filenum)
+			#file_num = meta[3][:6]
+			file_num = meta[3][-5:]
 			# weird cases like NE_8_Cass_MileGrove_31641_217936_1half.jpg. But some duplicate files get caught in this condition sometimes
-			if len(meta) == 7 and duplicate == "":
-				file_num = meta[4][:6]
+			if len(meta) == 7 and duplicate == "" and len(meta[4]) > 3:
+				file_num = meta[4][:5]
 			
 
 			if '1half' in old_file:
-				tail = '1half_A.jpg'
+				#tail = '1half_A.jpg'
+				tail = 'l_A.jpg'
 			elif '2half' in old_file:
-				tail = '2half_A.jpg'
+				#tail = '2half_A.jpg'
+				tail = 'r_A.jpg'
 			else:
 				tail = "A.jpg"
 			#For now, I will just use "A" instead of Source...
 			#print([state, new_year[2], new_county.lower(), file_num, tail])
 			new_file = "_".join([state, new_year[2], new_county.lower(), file_num, tail])
+			# duplicate issue (see line above largest for loop)
+			if duplicate == '1' and new_file in duplicate_set:
+				dup_file, dup_type = os.path.splitext(new_file)
+				dup_count = meta[4]
+				new_file = dup_file + "_Dup" + dup_count + dup_type
+			else:
+				duplicate_set.add(new_file)
 			new_csv_list.append([old_file, new_file, no_data_file, whitespace_file ,unusual_file, worse_version, duplicate, crossed_out ,schedule, page_no,establishment_count, legibility ,information_not_attainable])
 	if os.path.isdir(csv_name_output + "\\" + state) == False:
 		os.makedirs(csv_name_output + "\\" + state)

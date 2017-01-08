@@ -217,6 +217,8 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 	else:
 		shutil.copy(metadata_xlsx, csv_name_output + "\\"+ "temp_csvs" + "\\" + state + "_" + year + '.csv')
 	#print(metadata_csv)
+	# duplicates are usually not an issue for renaming, except in cases when the duplicate file's new name is the same as the non-duplicates new file
+	duplicate_set = set([])
 	with open(csv_name_output + "\\" + 'temp_csvs' + "\\" + state + "_" + year + '.csv', 'rt') as f:
 		file = csv.reader(f)
 		file.next()
@@ -235,7 +237,7 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 			
 			old_name, old_type = os.path.splitext(old_file)
 			#the old filenames have to match the ones in the actual directory -- the ones in the directory have labels, those in the csv do not
-			if "_L" not in old_file:
+			if "_L." not in old_file:
 				old_file = old_name + "_L" + old_type
 
 			#handle Kansas
@@ -245,7 +247,7 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 						no_data_file = '1'
 					if 'no text' in empty_indicator.lower():
 						whitespace_file = '1'
-				if year == '1870':
+				if year == '1870' or '1880':
 					if 'duplicate' in notes.lower():
 						duplicate = '1'
 					if 'duplication of previous photo' in notes.lower():
@@ -267,17 +269,45 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 					if i in old_file:
 						information_not_attainable = '1'
 
+			if state == 'MN' and year == '1850':
+				# only 4 files that are actually manufacturing census
+				if '296' in old_file: 
+					duplicate = '1'
+				if '277' in old_file:
+					worse_version = '1'
+
+				if 'no data' in empty_indicator.lower():
+					no_data_file = '1'
+				elif 'no text' in empty_indicator.lower():
+						whitespace_file = '1'
+				else:
+					no_data_count = 1
+					for i in ['159', '277', '296', '453']:
+						if i in old_file:
+							#print(old_file)
+							no_data_count = 0
+							break
+					#these are the only 4 files with data, so if a file isn't one, mark as no data
+					if no_data_count == 1:
+						no_data_file = '1'
 
 
 			#for filename, some of them might have really long numbers, and extra counties if "-" condition not met
 			filename, filetype = os.path.splitext(old_file)
 			meta = filename.split("_")
-			file_num = meta[3][:6]
+			#we want the last 5 digits (lots of leading zeros in old filenum)
+			#file_num = meta[3][:6]
+			file_num = meta[3][-5:]
+			#no county in old filename for this state-year
+			if state == 'MN' and year == '1850':
+				file_num = meta[2][:6]
 
 			if '1half' in old_file:
-				tail = '1half_L.jpg'
+				#tail = '1half_L.jpg'
+				tail = 'l_L.jpg'
 			elif '2half' in old_file:
-				tail = '2half_L.jpg'
+				#tail = '2half_L.jpg'
+				tail = 'r_L.jpg'
 			else:
 				tail = "L.jpg"
 			# for Libscan, old files already have labels "_L"
@@ -296,6 +326,13 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 			'''
 			#For now, I will just use "A" instead of Source...
 			new_file = "_".join([state, new_year[2], new_county.lower(), file_num, tail])
+			# duplicate issue (see line above largest for loop)
+			if duplicate == '1' and new_file in duplicate_set:
+				dup_file, dup_type = os.path.splitext(new_file)
+				dup_count = meta[4]
+				new_file = dup_file + "_Dup" + dup_count + dup_type
+			else:
+				duplicate_set.add(new_file)
 			new_csv_list.append([old_file, new_file, no_data_file, whitespace_file ,unusual_file, worse_version, duplicate, crossed_out ,schedule, page_no ,establishment_count, legibility ,information_not_attainable])
 	if os.path.isdir(csv_name_output + "\\" + state) == False:
 		os.makedirs(csv_name_output + "\\" + state)
@@ -392,16 +429,19 @@ def csv_dict(current_path, package_path, dictionary):
 
 ######################################################################
 if __name__ == '__main__':
+	#csv_metadata(csv_name_output + "\\" +"MN_5_L_metadata_edited.csv", csv_name_output, {}, 'MN', '1850')
+
 	
 	folder_contents = os.listdir(csv_name_output)
 	for i in range(len(folder_contents)):
-		if os.path.isfile(csv_name_output + "\\" +folder_contents[i]) and '5' not in folder_contents[i]:
+		#if os.path.isfile(csv_name_output + "\\" +folder_contents[i]) and '5' not in folder_contents[i]:
+		if os.path.isfile(csv_name_output + "\\" +folder_contents[i]):
 			name = folder_contents[i].split("_")
 			state_abbrev = name[0]
 			year = '18' + name[1] + '0'
 			csv_metadata(csv_name_output + "\\" +folder_contents[i], csv_name_output, {}, state_abbrev, year)
 
-
+	
 	#just for KS 1880
 	#dictionary = collect(input_KS_8)
 	#new_dictionary = get_info(dictionary, input_KS_8, {})

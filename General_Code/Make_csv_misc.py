@@ -199,39 +199,39 @@ def no_county_folder(current_path, input_path, output_path_final):
 			next_path = current_path + "\\" + element
 			no_county_folder(next_path, input_path, output_path_final)
 
-def rename_w_metadata(input_csv, input_folder, stamp):
+def rename_w_metadata(input_csv, input_folder):
 	'''
-	For now, this will take a processed renaming csv, and use it to rename a folder of files
+	For now, this will take a processed renaming csv, and use it to rename a folder of files (input folder)
 	'''
-	counter = 0
+	
 	with open(input_csv, 'rt') as f:
 		file = csv.reader(f)
 		file.next()
 		for row in file:
-			old_file, new_file, duplicate = row[0], row[1], row[6]
+			old_file, new_file = row[0], row[1]
 			old_path = input_folder + "\\" + old_file
 
 			new_path = input_folder + "\\" + new_file
-			if duplicate != "" and os.path.isfile(new_path):
-				counter += 1
-				file, filetype = os.path.splitext(new_path)
-				new_path = file + "_Dup" + str(counter) + filetype
+			#if duplicate != "" and os.path.isfile(new_path):
+				#counter += 1
+				#file, filetype = os.path.splitext(new_path)
+				#new_path = file + "_Dup" + str(counter) + filetype
 			#stamp = "_" + stamp
 			#print(stamp)
 			#return stamp
-			if stamp not in old_file:
-				file, filetype = os.path.splitext(old_path)
-				old_path = file + "_" + stamp + filetype
+			#if stamp not in old_file:
+				#file, filetype = os.path.splitext(old_path)
+				#old_path = file + "_" + stamp + filetype
 				
-			if new_path != old_path:
-				print(old_path)
+			if old_path != new_path:
+				print(old_path, new_path)
 				os.rename(old_path, new_path)
-
-			# test this condition first before commencing with os.rename above
 			
-			#if os.path.isfile(old_path) == False:
-				#print(old_path)
-
+			# test this condition first before commencing with os.rename above
+			'''
+			if os.path.isfile(old_path) == False:
+				print(old_path)
+			'''
 def package(input_path, current_path, output_path, stamp):
 	'''
 	This function is intended to take a general output folder for some file source as input, 
@@ -303,8 +303,11 @@ if __name__ == '__main__':
 	
 	#package(Famsearch_output, Famsearch_output, package_folder, 'F')
 	#assigned_path = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\General\\metadata_collection\\Assigned"
-	
-	rename_w_metadata("D:\\temp_nondropbox\\Adam\\Csvs for Renaming\\IA\\1870.csv", "D:\\temp_nondropbox\\Adam\\Renamed Priority Files\\IA\\1870", "A")
+	csv_renaming_folder = "D:\\temp_nondropbox\\Adam\\Csvs for Renaming"
+	files_to_rename = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files"
+
+	#for i in folder_contents = os.listdir(csv_name_output):
+	rename_w_metadata( csv_renaming_folder + "\\" + "IA" + "\\" "1870.csv", files_to_rename + "\\" + "IA" + "\\"+ "1870")
 
 	'''
 	folder_list = os.listdir(package_folder)
