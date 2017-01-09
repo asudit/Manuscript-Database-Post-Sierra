@@ -147,6 +147,10 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 			new_year, old_file, new_county, bad_cut_indicator, empty_indicator = row[1], row[2], row[3], row[5], row[6]
 			schedule, page_no , establishment_count, legibility = row[7], row[8] ,row[9], row[11]
 			#MO 1850, collector notes some unusual stuff in these columns, when not marked as "1"
+			if "/" in new_county:
+				new_county_parts = new_county.split("/")
+				new_county = "-".join(new_county_parts)
+
 			notes = row[13]
 			if len(row) == 15:
 				notes_additonal = row[14]

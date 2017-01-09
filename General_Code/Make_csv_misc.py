@@ -210,6 +210,8 @@ def rename_w_metadata(input_csv, input_folder):
 		for row in file:
 			old_file, new_file = row[0], row[1]
 			old_path = input_folder + "\\" + old_file
+			#print(old_path)
+			#break
 
 			new_path = input_folder + "\\" + new_file
 			#if duplicate != "" and os.path.isfile(new_path):
@@ -222,16 +224,20 @@ def rename_w_metadata(input_csv, input_folder):
 			#if stamp not in old_file:
 				#file, filetype = os.path.splitext(old_path)
 				#old_path = file + "_" + stamp + filetype
-				
-			if old_path != new_path:
-				print(old_path, new_path)
+			if old_path != new_path and os.path.isfile(new_path) == False:
+				#print(old_path, new_path)
 				os.rename(old_path, new_path)
-			
+			'''
+			if os.path.isfile(old_path) == False:
+				print('old path:',old_path, "\n new path:", new_path)
+				#os.rename(old_path, new_path)
+			'''
 			# test this condition first before commencing with os.rename above
 			'''
 			if os.path.isfile(old_path) == False:
 				print(old_path)
 			'''
+		print("Done with", old_file)
 def package(input_path, current_path, output_path, stamp):
 	'''
 	This function is intended to take a general output folder for some file source as input, 
@@ -305,9 +311,13 @@ if __name__ == '__main__':
 	#assigned_path = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\General\\metadata_collection\\Assigned"
 	csv_renaming_folder = "D:\\temp_nondropbox\\Adam\\Csvs for Renaming"
 	files_to_rename = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files"
+	folder_contents = os.listdir(csv_renaming_folder)
 
-	#for i in folder_contents = os.listdir(csv_name_output):
-	rename_w_metadata( csv_renaming_folder + "\\" + "IA" + "\\" "1870.csv", files_to_rename + "\\" + "IA" + "\\"+ "1870")
+	for i in folder_contents:
+		file_meta = i.split("_")
+		#i dont want the .csv to be part of year
+		state_abbrev, year = file_meta[0], file_meta[1][:-4]
+		rename_w_metadata( csv_renaming_folder + "\\" + i, files_to_rename + "\\" + state_abbrev + "\\"+ year)
 
 	'''
 	folder_list = os.listdir(package_folder)
@@ -324,5 +334,3 @@ if __name__ == '__main__':
 	
 	'''
 		
-
-	
