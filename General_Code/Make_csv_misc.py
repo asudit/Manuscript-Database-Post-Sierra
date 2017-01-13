@@ -304,7 +304,7 @@ def check_renamed_files(input_csv, input_folder, checking_folder_path, task):
 				next_file = {'new_file': new_file ,'schedule': schedule, 'page_no': page_no, 'est_count': est_count, 'legibility': legibility, 
 														'worse_version': worse_version, 'duplicate': duplicate}
 				checking_dict[county].append(next_file)
-
+'''
 	#now the fun begins -- we can make MO much more precise, using ends with a or b
 	if task == 'option2':
 		for county in checking_dict.keys():
@@ -375,6 +375,12 @@ def check_renamed_files(input_csv, input_folder, checking_folder_path, task):
 						k, j = k - 1, j +1
 
 	print("Done with %s_%s", state, year)
+'''
+
+def duplicates_worse_version():
+	'''
+	After marking in each csv
+	'''
 
 def package(input_path, current_path, output_path, stamp):
 	'''
