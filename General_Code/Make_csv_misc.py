@@ -266,7 +266,8 @@ def check_renamed_files(input_csv, input_folder, checking_folder_path, task):
 					os.makedirs(path)
 	if task == 'option2':
 		for field in option2_names:
-			for path in [checking_st_yr_folder, checking_st_yr_folder + "\\" + field, checking_st_yr_folder + "\\" + field + "\\" + 'False_Alarm']:
+			field_folder = checking_st_yr_folder + "\\" + field
+			for path in [checking_st_yr_folder, field_folder, field_folder + "\\" + 'False_Alarm', field_folder + "\\" + 'Originals']:
 				if os.path.isdir(path) == False:
 					os.makedirs(path)
 		#make dictionary
@@ -294,7 +295,12 @@ def check_renamed_files(input_csv, input_folder, checking_folder_path, task):
 						shutil.copy(new_path, checking_st_yr_folder + "\\" + option1_names[i] + "\\" + new_file)
 
 			if task == 'option2':
-				
+				for i in range(len(option2)):
+					if option2[i] == '1' and os.path.isfile(checking_st_yr_folder + "\\" + option2_names[i] + "\\" + new_file) == False:
+						shutil.copy(new_path, checking_st_yr_folder + "\\" + option2_names[i] + "\\" + new_file)
+					if option2[i] == '2' and os.path.isfile(checking_st_yr_folder + "\\" + option2_names[i] + "\\" +  'Originals' + "\\" + new_file) == False:
+						shutil.copy(new_path, checking_st_yr_folder + "\\" + option2_names[i] + "\\" +  'Originals' + "\\" + new_file)
+				'''
 				meta = new_file.split("_")
 				state_abbrev, year, county, filenum = meta[0], meta[1], meta[2], meta[3]
 				
@@ -304,83 +310,63 @@ def check_renamed_files(input_csv, input_folder, checking_folder_path, task):
 				next_file = {'new_file': new_file ,'schedule': schedule, 'page_no': page_no, 'est_count': est_count, 'legibility': legibility, 
 														'worse_version': worse_version, 'duplicate': duplicate}
 				checking_dict[county].append(next_file)
-'''
-	#now the fun begins -- we can make MO much more precise, using ends with a or b
-	if task == 'option2':
-		for county in checking_dict.keys():
-			list_length = len(checking_dict[county])
-			
-			#print(checking_dict[county])
-			#break
-
-			for i in range(list_length):
-				file_dict = checking_dict[county][i]
-				issue = ""
-				if file_dict['worse_version'] == '1': 
-					issue = 'worse_version'
-				elif file_dict['duplicate'] == '1':
-					issue = 'duplicate'
-
-				if issue != "":
-					#print('Well, worked up to here')
-					likelihood1 = [file_dict['schedule'], file_dict['page_no'],file_dict['est_count'], file_dict['legibility']]
-					likelihood2 = [file_dict['schedule'], file_dict['est_count'], file_dict['legibility']]
-					# :o :o :( :(
-					k, j = i - 1, i + 1 
-					while k >= 0 or j <= list_length - 1:
-						if k in range(list_length):
-							file1_dict = checking_dict[county][k]
-							likelihood1_file1 = [file1_dict['schedule'], file1_dict['page_no'],file1_dict['est_count'], file1_dict['legibility']]
-							likelihood2_file1 = [file1_dict['schedule'], file1_dict['est_count'], file1_dict['legibility']]
-							if likelihood1 == likelihood1_file1:
-								#print('Yay')
-								if file1_dict[issue] != "1":
-									if os.path.isfile(checking_st_yr_folder + "\\" + issue + "\\" + file_dict['new_file']) == False:
-										#print('copy me')
-										shutil.copy(input_folder + "\\" + file_dict['new_file'], checking_st_yr_folder + "\\" + issue + "\\" + file_dict['new_file'])
-									if os.path.isfile(checking_st_yr_folder + "\\" + issue + "\\" + file1_dict['new_file']) == False:
-										shutil.copy(input_folder + "\\" + file1_dict['new_file'], checking_st_yr_folder + "\\" + issue + "\\" + file1_dict['new_file'])
-									break
-							if likelihood2 == likelihood2_file1:
-								#print('Yay')
-								if file1_dict[issue] != "1":
-									if os.path.isfile(checking_st_yr_folder + "\\" + issue + "\\" + file_dict['new_file']) == False:
-										#print('copy me')
-										shutil.copy(input_folder + "\\" + file_dict['new_file'], checking_st_yr_folder + "\\" + issue + "\\" + file_dict['new_file'])
-									if os.path.isfile(checking_st_yr_folder + "\\" + issue + "\\" + file1_dict['new_file']) == False:
-										shutil.copy(input_folder + "\\" + file1_dict['new_file'], checking_st_yr_folder + "\\" + issue + "\\" + file1_dict['new_file'])
-									break
-						if j in range(list_length):
-							file2_dict = checking_dict[county][j]
-							likelihood1_file2 = [file2_dict['schedule'], file2_dict['page_no'],file2_dict['est_count'], file2_dict['legibility']]
-							likelihood2_file2 = [file2_dict['schedule'], file2_dict['est_count'], file2_dict['legibility']]
-							if likelihood1 == likelihood1_file2:
-								#print('Yay')
-								if file2_dict[issue] != "1":
-									if os.path.isfile(checking_st_yr_folder + "\\" + issue + "\\" + file_dict['new_file']) == False:
-										#print('copy me')
-										shutil.copy(input_folder + "\\" + file_dict['new_file'], checking_st_yr_folder + "\\" + issue + "\\" + file_dict['new_file'])
-									if os.path.isfile(checking_st_yr_folder + "\\" + issue + "\\" + file2_dict['new_file']) == False:
-										shutil.copy(input_folder + "\\" + file2_dict['new_file'], checking_st_yr_folder + "\\" + issue + "\\" + file2_dict['new_file'])
-									break
-							if likelihood2 == likelihood2_file2:
-								#print('Yay')
-								if file2_dict[issue] != "1":
-									if os.path.isfile(checking_st_yr_folder + "\\" + issue + "\\" + file_dict['new_file']) == False:
-										#print('copy me')
-										shutil.copy(input_folder + "\\" + file_dict['new_file'], checking_st_yr_folder + "\\" + issue + "\\" + file_dict['new_file'])
-									if os.path.isfile(checking_st_yr_folder + "\\" + issue + "\\" + file2_dict['new_file']) == False:
-										shutil.copy(input_folder + "\\" + file2_dict['new_file'], checking_st_yr_folder + "\\" + issue + "\\" + file2_dict['new_file'])
-									break
-						k, j = k - 1, j +1
-
+				'''
 	print("Done with %s_%s", state, year)
-'''
 
-def duplicates_worse_version():
+
+def final_filter(checking_folder_state_yr, renamed_files_state_yr, filtered_folder, deletion_folder):
 	'''
-	After marking in each csv
+	This function is to be used only after all issues associated with files have been checked and organized. This function will move
+	files deemed to be duplicates, actual worse version, white space, and no data to "to be deleted" folders, from the renamed files database. It will move files
+	that are worse_version pairs, crossed out, to separate folders. Take as input state-year combo
 	'''
+
+	# worse_version # crossed out # info not attainable # actual duplicates # no data # whitespace
+	folder_contents = os.listdir(checking_folder_state_yr)
+
+	for folder in folder_contents:
+		current_folder = checking_folder_state_yr + "\\" + folder
+		if folder == 'worse_version':
+			filtered_folder_wor_ver = filtered_folder + "\\" + folder 
+			deletion_folder_wor_ver = deletion_folder + "\\" + folder
+			for i in [filtered_folder_wor_ver, deletion_folder_wor_ver]:
+				if os.path.isdir(i) == False:
+					os.makedirs(i)
+			if os.path.isdir(current_folder + "\\" + 'Has Additional Info Original Doesnt Have'):
+				pairs = os.listdir(current_folder + "\\" + 'Has Additional Info Original Doesnt Have')
+				#for matched file pairs
+				for pair in pairs:
+					if os.path.isfile(renamed_files_state_yr + "\\" + pair):
+						
+						shutil.move(renamed_files_state_yr + "\\" + pair, filtered_folder_wor_ver + "\\" + pair)
+						#print(renamed_files_state_yr + "\\" + pair, filtered_folder_wor_ver + "\\" + pair)
+			#actually worse versions
+			for element in os.listdir(current_folder):
+				if os.path.isfile(renamed_files_state_yr + "\\" + element):
+					
+					shutil.move(renamed_files_state_yr + "\\" + element, deletion_folder_wor_ver + "\\" + element)
+					#print(renamed_files_state_yr + "\\" + element, deletion_folder_wor_ver + "\\" + element)
+		if folder == 'crossed':
+			filtered_folder_cross = filtered_folder + "\\" + folder
+			if os.path.isdir(filtered_folder_cross) == False:
+				os.makedirs(filtered_folder_cross)
+			for element in os.listdir(current_folder):
+				if os.path.isfile(renamed_files_state_yr + "\\" + element):
+					
+					shutil.move(renamed_files_state_yr + "\\" + element, filtered_folder_cross + "\\" + element)
+					#print(renamed_files_state_yr + "\\" + element, filtered_folder_cross + "\\" + element)
+		if folder in ['no_data', 'duplicate', 'whitespace', 'info_not_attainable']:
+			deletion_folder_other = deletion_folder + "\\" + folder
+			if os.path.isdir(deletion_folder_other) == False:
+				os.makedirs(deletion_folder_other)
+			for element in os.listdir(current_folder):
+				if os.path.isfile(renamed_files_state_yr + "\\" + element):
+					
+					shutil.move(renamed_files_state_yr + "\\" + element, deletion_folder_other + "\\" + element)
+					#print(renamed_files_state_yr + "\\" + element, deletion_folder_other + "\\" + element)
+	print('Done with %s', current_folder)
+
+
 
 def package(input_path, current_path, output_path, stamp):
 	'''
@@ -456,14 +442,26 @@ if __name__ == '__main__':
 	csv_renaming_folder = "D:\\temp_nondropbox\\Adam\\Csvs for Renaming"
 	files_to_rename = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files"
 	checking_folder = "D:\\temp_nondropbox\\Adam\\Checking Folder After Renaming"
+	to_be_deleted = "D:\\temp_nondropbox\\Adam\\To be Deleted"
+	filtered_folder = "D:\\temp_nondropbox\\Adam\\Filtered"
 	folder_contents = os.listdir(csv_renaming_folder)
 
+	#state_year = "\\" + 'KS' + "\\" + "1870"
+	for i in folder_contents:
+		file_meta = i.split("_")
+		state_abbrev, year = file_meta[0], file_meta[1][:-4]
+		state_year = "\\" + state_abbrev + "\\" + year
+		if year != '1880':
+			final_filter(checking_folder + state_year, files_to_rename + state_year, filtered_folder + state_year, to_be_deleted + state_year)
+
+	'''
 	for i in folder_contents:
 		file_meta = i.split("_")
 		#i dont want the .csv to be part of year
 		state_abbrev, year = file_meta[0], file_meta[1][:-4]
 		check_renamed_files( csv_renaming_folder + "\\" + i, files_to_rename + "\\" + state_abbrev + "\\"+ year, checking_folder, 'option2')
 
+	'''
 	'''
 	folder_list = os.listdir(package_folder)
 	#folder_list = os.listdir(assigned_path)
