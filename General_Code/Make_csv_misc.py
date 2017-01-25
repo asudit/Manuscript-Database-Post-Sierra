@@ -243,7 +243,8 @@ def check_renamed_files(input_csv, input_folder, checking_folder_path, task):
 	'''
 	This function takes in the metadata collection sheets used to rename the files before shipment
 	to data collection companies, along with the renamed file folders, and generated new folders with copied
-	files that will be used to check if files are corrupted, duplicated, worse_version, etc
+	files that will be used to check if files are corrupted, duplicated, worse_version, etc. option3 will organize filtered files
+	(filtered via final filter function) into sub-folders by schedule
 	'''
 
 	#just want the name of the csv, not it's path
@@ -273,6 +274,11 @@ def check_renamed_files(input_csv, input_folder, checking_folder_path, task):
 		#make dictionary
 		checking_dict = {}
 		
+	
+	#if task == 'option3':
+
+
+
 	with open(input_csv, 'rt') as f:
 		
 		file = csv.reader(f)
@@ -314,6 +320,59 @@ def check_renamed_files(input_csv, input_folder, checking_folder_path, task):
 	print("Done with %s_%s", state, year)
 
 
+def rearrange_by_schedule(crosswalk_csv, metadata_csv_folder, renamed_file_input_folder, filtered_folder, output_folder):
+	'''
+	this function will only be for rearranging 1880 folders by schedule. Only do this AFTER running check_renamed_files() and then final_filter() on the files.
+	crosswalk_csv will be the schedule cross walk Julius made. file_input_folder will be renamed files
+	folder, or the filtered files folders. ouput folder path should be "D:\temp_nondropbox\Adam\Priority States 1880 - by schedule"
+	'''
+	crosswalk_dict = {}
+
+	with open(crosswalk_csv, 'rt') as f:
+		file = csv.reader(f)
+		file.next()
+		for row in file:
+			meta = row[0].split("_")
+			state, year = meta[0], meta[1]
+			if (state, year) not in crosswalk_dict:
+				crosswalk_dict[(state, year)] = {}
+			crosswalk_dict[(state, year)][row[0]] = row[1]
+			#print(row[0], row[1])
+	for state_year_key in crosswalk_dict.keys():
+		if len(state_year_key[1]) == 1:
+			state, year = state_year_key[0], '18' + state_year_key[1] + '0'
+		else:
+			state, year = state_year_key[0], state_year_key[1]
+
+		metadata_csv = metadata_csv_folder + "\\" + state + "_" + year + ".csv"
+		with open(metadata_csv, 'rt') as f:
+			file = csv.reader(f)
+			file.next()
+			for row in file:
+				old_file, new_file = row[0], row[1]
+				if old_file in crosswalk_dict[state_year_key]:
+					schedule = crosswalk_dict[state_year_key][old_file]
+
+					regular_folder = output_folder + "\\" + 'Regular files' + "\\" + state + "\\" + year + "\\" + schedule
+					filtered_cross_folder = output_folder + "\\" + 'Filter' + "\\" + state + "\\" + year + "\\" + 'crossed' + "\\" + schedule
+					filtered_worsever_folder = output_folder + "\\" +  'Filter' + "\\" + state + "\\" + year + "\\" + 'worse_version' + "\\" + schedule
+				
+					for i in [regular_folder, filtered_cross_folder, filtered_worsever_folder]:
+						if os.path.isdir(i) == False:
+							os.makedirs(i)
+
+					if os.path.isfile(renamed_file_input_folder + "\\" + state + "\\" + year + "\\" + new_file) and os.path.isfile(regular_folder + "\\" + new_file) == False:
+						shutil.copy(renamed_file_input_folder + "\\" + state + "\\" + year + "\\" + new_file, regular_folder + "\\" + new_file)
+					elif os.path.isfile(filtered_folder + "\\" + state + "\\" + year + "\\" + 'crossed' + "\\" + new_file) and os.path.isfile(filtered_cross_folder + "\\" + new_file) == False:
+						shutil.copy(filtered_folder + "\\" + state + "\\" + year + "\\" + 'crossed' + "\\" + new_file, filtered_cross_folder + "\\" + new_file)
+					elif os.path.isfile(filtered_folder + "\\" + state + "\\" + year + "\\" + 'worse_version' + "\\" + new_file) and os.path.isfile(filtered_worsever_folder + "\\" + new_file) == False:
+						shutil.copy(filtered_folder + "\\" + state + "\\" + year + "\\" + 'worse_version' + "\\" + new_file, filtered_worsever_folder + "\\" + new_file)
+					else:
+						print('RuhRoh Scooby! %s', new_file)
+				else:
+					print(new_file)
+
+
 def final_filter(checking_folder_state_yr, renamed_files_state_yr, filtered_folder, deletion_folder):
 	'''
 	This function is to be used only after all issues associated with files have been checked and organized. This function will move
@@ -324,7 +383,8 @@ def final_filter(checking_folder_state_yr, renamed_files_state_yr, filtered_fold
 	# worse_version # crossed out # info not attainable # actual duplicates # no data # whitespace
 	folder_contents = os.listdir(checking_folder_state_yr)
 
-	for folder in folder_contents:
+	# order matters
+	for folder in ['worse_version', 'duplicate', 'crossed', 'info_not_attainable', 'no_data', 'whitespace' ]:
 		current_folder = checking_folder_state_yr + "\\" + folder
 		if folder == 'worse_version':
 			filtered_folder_wor_ver = filtered_folder + "\\" + folder 
@@ -446,20 +506,30 @@ if __name__ == '__main__':
 	filtered_folder = "D:\\temp_nondropbox\\Adam\\Filtered"
 	folder_contents = os.listdir(csv_renaming_folder)
 
+	schedule_crosswalk_csv = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files - by schedule\\file_schedule_crosswalk.csv"
+	output_schedule_folder = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files - by schedule"
+
+	rearrange_by_schedule(schedule_crosswalk_csv, csv_renaming_folder, files_to_rename, filtered_folder, output_schedule_folder)
 	#state_year = "\\" + 'KS' + "\\" + "1870"
-	for i in folder_contents:
-		file_meta = i.split("_")
-		state_abbrev, year = file_meta[0], file_meta[1][:-4]
-		state_year = "\\" + state_abbrev + "\\" + year
-		if year != '1880':
-			final_filter(checking_folder + state_year, files_to_rename + state_year, filtered_folder + state_year, to_be_deleted + state_year)
+	
+
 
 	'''
 	for i in folder_contents:
 		file_meta = i.split("_")
+		state_abbrev, year = file_meta[0], file_meta[1][:-4]
+		state_year = "\\" + state_abbrev + "\\" + year
+		if year == '1880':
+			final_filter(checking_folder + state_year, files_to_rename + state_year, filtered_folder + state_year, to_be_deleted + state_year)
+	'''
+	'''
+
+	for i in folder_contents:
+		file_meta = i.split("_")
 		#i dont want the .csv to be part of year
 		state_abbrev, year = file_meta[0], file_meta[1][:-4]
-		check_renamed_files( csv_renaming_folder + "\\" + i, files_to_rename + "\\" + state_abbrev + "\\"+ year, checking_folder, 'option2')
+		if year == '1880':
+			check_renamed_files( csv_renaming_folder + "\\" + i, files_to_rename + "\\" + state_abbrev + "\\"+ year, checking_folder, 'option2')
 
 	'''
 	'''
