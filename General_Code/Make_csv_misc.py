@@ -320,7 +320,7 @@ def check_renamed_files(input_csv, input_folder, checking_folder_path, task):
 	print("Done with %s_%s", state, year)
 
 
-def rearrange_by_schedule(crosswalk_csv, metadata_csv_folder, renamed_file_input_folder, filtered_folder, output_folder):
+def rearrange_by_schedule(crosswalk_csv, metadata_csv_folder, renamed_file_input_folder, filtered_folder, not_there_folder ,output_folder):
 	'''
 	this function will only be for rearranging 1880 folders by schedule. Only do this AFTER running check_renamed_files() and then final_filter() on the files.
 	crosswalk_csv will be the schedule cross walk Julius made. file_input_folder will be renamed files
@@ -336,8 +336,23 @@ def rearrange_by_schedule(crosswalk_csv, metadata_csv_folder, renamed_file_input
 			state, year = meta[0], meta[1]
 			if (state, year) not in crosswalk_dict:
 				crosswalk_dict[(state, year)] = {}
+			#the file labels are not there for NE or for MO :<
+			if 'NE' in row[0]:
+				file, filetype = os.path.splitext(row[0])
+				if '1half' in file:
+					file_split = file.split('_1half')
+					row[0] = file_split[0]+ "_A" + filetype
+				else:
+					row[0] = file + "_A" + filetype
+				print(row[0])
+			if 'MO' in row[0]:
+				file, filetype = os.path.splitext(row[0])
+				row[0] = file + "_S" + filetype
+				#print(row[0])
+
 			crosswalk_dict[(state, year)][row[0]] = row[1]
 			#print(row[0], row[1])
+	print(crosswalk_dict.keys())
 	for state_year_key in crosswalk_dict.keys():
 		if len(state_year_key[1]) == 1:
 			state, year = state_year_key[0], '18' + state_year_key[1] + '0'
@@ -345,19 +360,29 @@ def rearrange_by_schedule(crosswalk_csv, metadata_csv_folder, renamed_file_input
 			state, year = state_year_key[0], state_year_key[1]
 
 		metadata_csv = metadata_csv_folder + "\\" + state + "_" + year + ".csv"
+
+		#print(metadata_csv)
 		with open(metadata_csv, 'rt') as f:
+			#if 'NE' in metadata_csv:
+				#print(state_year_key)
+				#print(crosswalk_dict[state_year_key].keys())
 			file = csv.reader(f)
 			file.next()
 			for row in file:
 				old_file, new_file = row[0], row[1]
 				if old_file in crosswalk_dict[state_year_key]:
+					#if 'NE' in metadata_csv or 'MO' in metadata_csv:
+						#print('hey it worked')
+					#if 'NE' in metadata_csv:
+						#print(old_file)
 					schedule = crosswalk_dict[state_year_key][old_file]
 
 					regular_folder = output_folder + "\\" + 'Regular files' + "\\" + state + "\\" + year + "\\" + schedule
 					filtered_cross_folder = output_folder + "\\" + 'Filter' + "\\" + state + "\\" + year + "\\" + 'crossed' + "\\" + schedule
 					filtered_worsever_folder = output_folder + "\\" +  'Filter' + "\\" + state + "\\" + year + "\\" + 'worse_version' + "\\" + schedule
+					otherwise_folder = not_there_folder + "\\" + state +  "\\" + year 
 				
-					for i in [regular_folder, filtered_cross_folder, filtered_worsever_folder]:
+					for i in [regular_folder, filtered_cross_folder, filtered_worsever_folder, otherwise_folder]:
 						if os.path.isdir(i) == False:
 							os.makedirs(i)
 
@@ -368,9 +393,17 @@ def rearrange_by_schedule(crosswalk_csv, metadata_csv_folder, renamed_file_input
 					elif os.path.isfile(filtered_folder + "\\" + state + "\\" + year + "\\" + 'worse_version' + "\\" + new_file) and os.path.isfile(filtered_worsever_folder + "\\" + new_file) == False:
 						shutil.copy(filtered_folder + "\\" + state + "\\" + year + "\\" + 'worse_version' + "\\" + new_file, filtered_worsever_folder + "\\" + new_file)
 					else:
-						print('RuhRoh Scooby! %s', new_file)
+						#print('RuhRoh Scooby! %s', new_file)
+						pass
 				else:
-					print(new_file)
+					if os.path.isfile(renamed_file_input_folder + "\\" + state + "\\" + year + "\\" + new_file) and os.path.isfile(otherwise_folder + "\\" + new_file) == False:
+						shutil.copy(renamed_file_input_folder + "\\" + state + "\\" + year + "\\" + new_file, otherwise_folder + "\\" + new_file)
+					elif os.path.isfile(filtered_folder + "\\" + state + "\\" + year + "\\" + 'crossed' + "\\" + new_file) and os.path.isfile(otherwise_folder + "\\" + new_file) == False:
+						shutil.copy(filtered_folder + "\\" + state + "\\" + year + "\\" + 'crossed' + "\\" + new_file, otherwise_folder + "\\" + new_file)
+					elif os.path.isfile(filtered_folder + "\\" + state + "\\" + year + "\\" + 'worse_version' + "\\" + new_file) and os.path.isfile(otherwise_folder + "\\" + new_file) == False:
+						shutil.copy(filtered_folder + "\\" + state + "\\" + year + "\\" + 'worse_version' + "\\" + new_file, otherwise_folder + "\\" + new_file)
+					else:
+						print('Sad Panda')
 
 
 def final_filter(checking_folder_state_yr, renamed_files_state_yr, filtered_folder, deletion_folder):
@@ -441,6 +474,7 @@ def package(input_path, current_path, output_path, stamp):
 		file = rel_path.split("\\")
 		#print(file)
 		
+		#(1) First adjustment
 		#just files with one branch, and then all files
 		meta = file[0].split("_")
 
@@ -460,6 +494,7 @@ def package(input_path, current_path, output_path, stamp):
 		if os.path.isdir(package_folder) == False:
 			os.makedirs(package_folder)
 		#just for now
+		#(2) second adjustment
 		#new_path = package_folder + "\\" + file[1]
 		
 		#for Nara, just files with one branch, and then all files
@@ -470,6 +505,7 @@ def package(input_path, current_path, output_path, stamp):
 			#print(current_path)
 			file_obj = file_obj.resize((int(width * shrink_factor), int(height * shrink_factor)), Image.ANTIALIAS)
 			#default setting
+			#(3) third adjustment
 			#file_obj.save(package_folder + "\\" + file[1], optimize = True, quality = quality_factor)
 			#for NARA, just files with one branch, and then all files
 			file_obj.save(package_folder + "\\" + file[0], optimize = True, quality = quality_factor)
@@ -504,12 +540,13 @@ if __name__ == '__main__':
 	checking_folder = "D:\\temp_nondropbox\\Adam\\Checking Folder After Renaming"
 	to_be_deleted = "D:\\temp_nondropbox\\Adam\\To be Deleted"
 	filtered_folder = "D:\\temp_nondropbox\\Adam\\Filtered"
+	not_in_crosswalk = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files - by schedule\\Not in crosswalk"
 	folder_contents = os.listdir(csv_renaming_folder)
 
 	schedule_crosswalk_csv = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files - by schedule\\file_schedule_crosswalk.csv"
 	output_schedule_folder = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files - by schedule"
 
-	rearrange_by_schedule(schedule_crosswalk_csv, csv_renaming_folder, files_to_rename, filtered_folder, output_schedule_folder)
+	rearrange_by_schedule(schedule_crosswalk_csv, csv_renaming_folder, files_to_rename, filtered_folder, not_in_crosswalk ,output_schedule_folder)
 	#state_year = "\\" + 'KS' + "\\" + "1870"
 	
 

@@ -438,6 +438,8 @@ if __name__ == '__main__':
 	#csv_metadata(csv_name_output + "\\" +"MN_5_L_metadata_edited.csv", csv_name_output, {}, 'MN', '1850')
 
 	
+
+	
 	folder_contents = os.listdir(csv_name_output)
 	for i in range(len(folder_contents)):
 		#if os.path.isfile(csv_name_output + "\\" +folder_contents[i]) and '5' not in folder_contents[i]:
