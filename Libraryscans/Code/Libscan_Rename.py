@@ -13,6 +13,7 @@ threshold = .08
 input_path_1 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\raw_data_copies\\Scans_via_Library_tiff\\Digital Scanning 5029-3"
 input_path_2 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\raw_data_copies\\Scans_via_Library_tiff\\Digital Scanning 5029-6"
 input_path_3 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\raw_data_copies\\Scans_via_Library_tiff\\Reels 132-149"
+input_path_4 = "D:\\temp_nondropbox\\temp_raw_copies_tiff"
 #temporarily, I am not integrating KS 1880 with rest of libscans b/c syncing issues
 input_KS_8 = "D:\\temp_nondropbox\\Adam\\Kansas 1880 (LibScans)\\Input"
 
@@ -21,6 +22,7 @@ input_path_list = [input_path_1, input_path_2, input_path_3]
 excel_path_1 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Temp\\Jeremy rolls_edited.xlsx"
 #excel_path_2 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Temp\\jeremy_rolls_batch_2_edited.xlsx"
 excel_path_3 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Temp\\batch3_edited.xlsx"
+excel_path_4 = "D:\\temp_nondropbox\\New_batches_csv.xlsx"
 excel_path_KS_8 = "D:\\temp_nondropbox\\Adam\\Kansas 1880 (LibScans)\\Kansas 1880.xlsx"
 
 excel_path_list = [excel_path_1, excel_path_1, excel_path_3]
@@ -28,8 +30,12 @@ excel_path_list = [excel_path_1, excel_path_1, excel_path_3]
 #output_path = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Output"
 csv_name_output = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Renaming metadata"
 #output_path = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Output_tiff"
+output_path = "D:\\temp_nondropbox\\Additional Output"
 #just for Kansas 1880
-output_path = "D:\\temp_nondropbox\\Adam\\Kansas 1880 (LibScans)\\KS 1880 Output"
+#output_path = "D:\\temp_nondropbox\\Adam\\Kansas 1880 (LibScans)\\KS 1880 Output"
+#for the new batch of libscans we just got, putting in non-dropbox
+
+#output_path = "D:\\temp_nondropbox\\Additional Output"
 
 temp_path = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Temp"
 
@@ -437,9 +443,14 @@ def csv_dict(current_path, package_path, dictionary):
 if __name__ == '__main__':
 	#csv_metadata(csv_name_output + "\\" +"MN_5_L_metadata_edited.csv", csv_name_output, {}, 'MN', '1850')
 
+
+
+	dictionary = collect(input_path_4)
+	new_dictionary = get_info(dictionary, input_path_4, {})
+	populate(new_dictionary, excel_path_4, 'Sheet1', 1)
 	
 
-	
+	'''
 	folder_contents = os.listdir(csv_name_output)
 	for i in range(len(folder_contents)):
 		#if os.path.isfile(csv_name_output + "\\" +folder_contents[i]) and '5' not in folder_contents[i]:
@@ -448,7 +459,7 @@ if __name__ == '__main__':
 			state_abbrev = name[0]
 			year = '18' + name[1] + '0'
 			csv_metadata(csv_name_output + "\\" +folder_contents[i], csv_name_output, {}, state_abbrev, year)
-
+	'''
 	
 	#just for KS 1880
 	#dictionary = collect(input_KS_8)
