@@ -1,9 +1,9 @@
 # exec(open("D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Code\\Libscan_Rename.py").read()) 
 import os, shutil, datetime, csv
 import xlrd
-import ghostscript
-from wand.image import Image
-#from PIL import Image
+#import ghostscript
+#from wand.image import Image
+from PIL import Image
 
 one_slice = .4
 two_slice = .6
@@ -43,8 +43,8 @@ test_input = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\
 
 states = {'california': 'CA', 'alabama': 'AL', 'arkansas': 'AR', 'colorado': 'CO','connecticut': 'CT', 'delaware': 'DE', 'dc': 'dc', 'florida': 'FL', 'georgia':'GA', 'kentucky': 'KY', 
 'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA', 'kansas':'KS', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD', 'massachusetts': 'MA', 'michigan': 'MI', 
-'minnesota': 'MN', 'mississippi': 'MS', 'montana': 'MT','nebraska':'NE', 'new hampshire': 'NH', 'new jersey': 'NJ', 'new york':'NY', 'north carolina':'NC', 'ohio':'OH', 
-'pennsylvania' : 'PA', 'south carolina': 'SC', 'tennessee': 'TN', 'texas': 'TX', 'vermont': 'VT', 'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 
+'minnesota': 'MN', 'mississippi': 'MS', 'montana': 'MT','nebraska':'NE', 'new hampshire': 'NH', 'new jersey': 'NJ','new mexico':'NM' ,'new york':'NY', 'north carolina':'NC', 'ohio':'OH',
+'oregon': 'OR','pennsylvania' : 'PA', 'south carolina': 'SC', 'tennessee': 'TN', 'texas': 'TX','utah':'UT' ,'vermont': 'VT', 'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 
 'wisconsin': 'WI'}
 
 remove = ['.dropbox', 'desktop.ini', 'Thumbs.db']
@@ -358,7 +358,7 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 
 
 def format_img(old_path, new_path):
-	print(old_path)
+	#print(new_path)
 	img = Image.open(old_path)
 	width, height  = img.size
 	if width > height and abs(float(width - height))/float(height) > threshold:
