@@ -4,8 +4,8 @@ import csv, wand
 #from wand.image import Image 
 from PIL import Image
 
-shrink_factor = .2
-quality_factor = 65
+shrink_factor = .01
+quality_factor = 1
 
 ancestry_output = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\ancestry\\Output"
 ancestry_output_final = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\ancestry\\Output_final"
@@ -15,7 +15,8 @@ MO_output_final = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_data
 
 lib_scan_output = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Output"
 lib_scan_output_final = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Output_final"
-lib_scan_output_tiff = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Output_tiff"
+#lib_scan_output_tiff = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Output_tiff"
+new_libscan_output = "D:\\temp_nondropbox\\Additional Output"
 KS_1880_output = "D:\\temp_nondropbox\\Adam\\Kansas 1880 (LibScans)\\KS 1880 Output"
 IA_1880_output = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\ancestry\\Output_final\\iowa\\1880"
 #MN_1850 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Output_pdf_incomplete\\minnesota"
@@ -26,7 +27,8 @@ Nara_texas_output = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_da
 test = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\General\\Make_csv_rename_test"
 package_test = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\LibraryScans\\Output_tiff\\alabama"
 
-package_folder = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\General\\metadata_collection"
+#package_folder = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\manuscript_database\\General\\metadata_collection"
+package_folder = "D:\\temp_nondropbox\\Packages"
 #package_folder = "D:\\temp_nondropbox\\Adam\\Iowa 1880 (Ancestry) Regen\\Package"
 
 remove = ['desktop.ini', '.dropbox']
@@ -36,14 +38,14 @@ package_list = ['Ancestry', 'MO', 'Library_Scans']
 file_stamp = ['A', 'S', 'L']
 
 states = {'california': 'CA', 'alabama': 'AL', 'arkansas': 'AR', 'colorado': 'CO','connecticut': 'CT', 'delaware': 'DE', 'dc': 'dc', 'florida': 'FL', 'georgia':'GA', 'kentucky': 'KY', 
-'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA', 'kansas':'KS', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD', 'massachusetts': 'MA', 'michigan': 'MI', 
+'idaho territory': 'ID'   ,'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA', 'kansas':'KS', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD', 'massachusetts': 'MA', 'michigan': 'MI', 
 'minnesota': 'MN', 'mississippi': 'MS', 'montana': 'MT','nebraska':'NE', 'new hampshire': 'NH', 'new jersey': 'NJ', 'new york':'NY', 'north carolina':'NC', 'ohio':'OH', 
 'pennsylvania' : 'PA', 'south carolina': 'SC', 'tennessee': 'TN', 'texas': 'TX', 'vermont': 'VT', 'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 
 'wisconsin': 'WI'}
 
 #csv_header = ['State', 'Year', 'File', 'County', 'RA_name', 'bad_cut', 'empty', 'Schedule', 'page_no', 'estab_count', 'legibility', 'totals_incl', 'Notes']
-csv_header = ['State', 'Year', 'File', 'County', 'RA_name', 'bad_cut', 'no data', 'Schedule', 'page_no', 'estab_count', 'legibility', 'totals_incl', 'Notes', 'whitespace',
-			   'duplicate', 'nullified/crossed out', 'info not attainable']
+csv_header = ['State', 'Year', 'File', 'County', 'RA_name', 'bad_cut', 'page_no', 'estab_count', 'legibility', 'totals_incl', 'Notes', 'multiple_counties',
+				'no data', 'nullified/crossed out', 'schedule type', 'duplicate', 'variant']
 
 
 
@@ -476,9 +478,9 @@ def package(input_path, current_path, output_path, stamp):
 		
 		#(1) First adjustment
 		#just files with one branch, and then all files
-		meta = file[0].split("_")
+		#meta = file[0].split("_")
 
-		#meta = file[1].split("_")
+		meta = file[1].split("_")
 
 		#just for KS 1880 replacing commented out part above with:
 		#meta = file[2].split("_")
@@ -495,10 +497,10 @@ def package(input_path, current_path, output_path, stamp):
 			os.makedirs(package_folder)
 		#just for now
 		#(2) second adjustment
-		#new_path = package_folder + "\\" + file[1]
+		new_path = package_folder + "\\" + file[1]
 		
 		#for Nara, just files with one branch, and then all files
-		new_path = package_folder + "\\" + file[0]
+		#new_path = package_folder + "\\" + file[0]
 		if os.path.isfile(new_path) == False:
 			file_obj = Image.open(current_path)
 			width, height = file_obj.width, file_obj.height
@@ -506,9 +508,10 @@ def package(input_path, current_path, output_path, stamp):
 			file_obj = file_obj.resize((int(width * shrink_factor), int(height * shrink_factor)), Image.ANTIALIAS)
 			#default setting
 			#(3) third adjustment
-			#file_obj.save(package_folder + "\\" + file[1], optimize = True, quality = quality_factor)
+			print(quality_factor, shrink_factor)
+			file_obj.save(package_folder + "\\" + file[1], optimize = True, quality = quality_factor)
 			#for NARA, just files with one branch, and then all files
-			file_obj.save(package_folder + "\\" + file[0], optimize = True, quality = quality_factor)
+			#file_obj.save(package_folder + "\\" + file[0], optimize = True, quality = quality_factor)
 			#for KS1880
 			#file_obj.save(package_folder + "\\" + file[2], optimize = True, quality = quality_factor)
 
@@ -546,10 +549,17 @@ if __name__ == '__main__':
 	schedule_crosswalk_csv = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files - by schedule\\file_schedule_crosswalk.csv"
 	output_schedule_folder = "D:\\temp_nondropbox\\Adam\\Renamed Priority Files - by schedule"
 
-	rearrange_by_schedule(schedule_crosswalk_csv, csv_renaming_folder, files_to_rename, filtered_folder, not_in_crosswalk ,output_schedule_folder)
+
+	#rearrange_by_schedule(schedule_crosswalk_csv, csv_renaming_folder, files_to_rename, filtered_folder, not_in_crosswalk ,output_schedule_folder)
 	#state_year = "\\" + 'KS' + "\\" + "1870"
 	
-
+	folder_list = os.listdir(new_libscan_output)
+	for i in range(len(folder_list)):
+		if '1880' not in folder_list[i] and 'already' not in folder_list[i]:
+			#input_path = "D:\\Dropbox (UChicago)\\MFG Project\\manuscript_database\\IN\\Output_final\\1880"
+			input_path = new_libscan_output + "\\" + folder_list[i]
+			package(input_path, input_path, package_folder, "L")
+	
 
 	'''
 	for i in folder_contents:
@@ -569,19 +579,20 @@ if __name__ == '__main__':
 			check_renamed_files( csv_renaming_folder + "\\" + i, files_to_rename + "\\" + state_abbrev + "\\"+ year, checking_folder, 'option2')
 
 	'''
-	'''
-	folder_list = os.listdir(package_folder)
+	
+	#folder_list = os.listdir(package_folder)
 	#folder_list = os.listdir(assigned_path)
-
+	'''
 	for i in range(len(folder_list)):
-		if folder_list[i].endswith('N'):
+		if folder_list[i] in ['GA1880_L', 'MN1860-1880_L', 'NC1850_L', 'NC1860_L', 'NC1870_L', 'NC1880_L', 'NM1880_L', 'OR1850-1870_L', 'OR1880_L', 
+				'PA1850_L', 'PA1860_L', 'UT1850-1870_L']:
 			input_path = package_folder + "\\" + folder_list[i]
 			#print(input_path)
-			if 'KS1860' in input_path:
-				continue
+			#if 'KS1860' in input_path:
+				#continue
 			dictionario = csv_dict(input_path, input_path, {})
-			csv_write(dictionario, input_path, 'N')
-	
+			csv_write(dictionario, input_path, 'L')
 	'''
+	
 		
 

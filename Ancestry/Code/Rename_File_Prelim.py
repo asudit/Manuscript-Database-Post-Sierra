@@ -501,7 +501,9 @@ def format_img(old_path, new_path):
 
 
 ######################################################################
+
 if __name__ == '__main__':
+	'''
 	folder_contents = os.listdir(csv_name_output)
 	for i in range(len(folder_contents)):
 		if os.path.isfile(csv_name_output + "\\" +folder_contents[i]):
@@ -509,8 +511,9 @@ if __name__ == '__main__':
 			state_abbrev = name[0]
 			year = '18' + name[1] + '0'
 			csv_metadata(csv_name_output + "\\" +folder_contents[i], csv_name_output, {}, state_abbrev, year)
-
-	#dictionary = collect(input_path)
+	'''
+	dictionary = collect(input_path)
+	#print(dictionary)
 	#print(list(dictionary.keys()))
 	#bad_cut_list, empty_list = read_metadata([])
 	#print(bad_cut_list)
