@@ -201,7 +201,10 @@ def populate(new_dictionary, excel_path, csv_sheet, skip_line):
 					
 					#shutil.copy(old_path, new_path)
 
-					format_img(old_path, new_path)
+					for i in ['AR', 'CO', 'NJ']:
+						if i in old_path:
+
+							format_img(old_path, new_path)
 
 
 def csv_metadata_2(metadata_xlsx, csv_name_output, dictionary, state, year):
@@ -462,8 +465,8 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 			writer.writerow(row)
 
 
-
 '''
+
 def format_img(old_path, new_path):
 	#print(new_path)
 	img = Image.open(old_path)
