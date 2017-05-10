@@ -13,7 +13,7 @@ threshold = .08
 input_path_1 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\raw_data_copies\\Scans_via_Library_tiff\\Digital Scanning 5029-3"
 input_path_2 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\raw_data_copies\\Scans_via_Library_tiff\\Digital Scanning 5029-6"
 input_path_3 = "D:\\Dropbox (Hornbeck Research)\\MFG Project\\raw_data_copies\\Scans_via_Library_tiff\\Reels 132-149"
-input_path_4 = "D:\\temp_nondropbox\\temp_raw_copies_tiff"
+input_path_4 = "D:\\temp_nondropbox\\temp_raw_copies_tiff\\Digital Scanning 052017 TIFF"
 input_path_5 = "D:\\temp_nondropbox\\temp_raw_copies_pdf"
 #temporarily, I am not integrating KS 1880 with rest of libscans b/c syncing issues
 input_KS_8 = "D:\\temp_nondropbox\\Adam\\Kansas 1880 (LibScans)\\Input"
@@ -104,6 +104,7 @@ def get_info(old_dictionary, current_path, new_dictionary):
 			else:
 				#if key == 'DSI Invoice 5301 Inventory.pdf':
 					#continue
+				#print(key)
 				decomp = key.split('Reel ', 1)[1]
 			decomp2 = decomp.split('_')
 				#print(decomp2)
@@ -201,10 +202,7 @@ def populate(new_dictionary, excel_path, csv_sheet, skip_line):
 					
 					#shutil.copy(old_path, new_path)
 
-					for i in ['AR', 'CO', 'NJ']:
-						if i in old_path:
-
-							format_img(old_path, new_path)
+					format_img(old_path, new_path)
 
 
 def csv_metadata_2(metadata_xlsx, csv_name_output, dictionary, state, year):
@@ -465,7 +463,7 @@ def csv_metadata(metadata_xlsx, csv_name_output, dictionary, state, year):
 			writer.writerow(row)
 
 
-'''
+
 
 def format_img(old_path, new_path):
 	#print(new_path)
@@ -493,8 +491,8 @@ def format_img(old_path, new_path):
 		file_path, filetype = os.path.splitext(new_path)
 		if os.path.isfile(file_path + "_L" + '.jpg') == False:
 			img.save(file_path + "_L" + '.jpg')
-'''
 
+'''
 #only used for PDF conversions
 
 def format_img(old_path, new_path):
@@ -523,7 +521,7 @@ def format_img(old_path, new_path):
 			if os.path.isfile(file_path + "_L" +'.jpg') == False:
 				img.save(filename = file_path + "_L" +'.jpg')
 			#shutil.copy(old_path, new_path)
-
+'''
 ####################################################csv_write and csv_dict have been moved to general code###################################################################
 '''
 def csv_write(dictionary, package_path):
@@ -566,8 +564,8 @@ if __name__ == '__main__':
 
 
 
-	dictionary = collect(input_path_5)
-	new_dictionary = get_info(dictionary, input_path_5, {})
+	dictionary = collect(input_path_4)
+	new_dictionary = get_info(dictionary, input_path_4, {})
 	populate(new_dictionary, excel_path_4, 'Sheet1', 1)
 	
 
